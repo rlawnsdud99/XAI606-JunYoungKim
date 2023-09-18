@@ -6,7 +6,7 @@ import torch.nn as nn
 import numpy as np
 
 
-def train_model(model, x_train, y_train, x_val, y_val, num_epochs=20):
+def train_model(model, x_train, y_train, x_val, y_val, num_epochs=None):
     # 데이터를 PyTorch Tensor로 변환
     x_train_tensor = torch.tensor(x_train, dtype=torch.float32).unsqueeze(1)
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
@@ -29,7 +29,6 @@ def train_model(model, x_train, y_train, x_val, y_val, num_epochs=20):
     optimizer = optim.Adam(model.parameters())
 
     # 학습
-    num_epochs = 20
     for epoch in range(num_epochs):
         model.train()
         for i, (x_batch, y_batch) in enumerate(train_loader):  # 새로운 차원 추가

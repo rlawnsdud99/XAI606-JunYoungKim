@@ -22,7 +22,7 @@ class EEGNet(nn.Module):
         self.fc = nn.Linear(1536, num_classes)
         self.softmax = nn.Softmax(dim=1)
 
-    def forward(self, x):
+    def forward(self, x, return_last_layer=False):
         x = self.conv1(x)
         x = self.batchnorm1(x)
         x = self.depthwise(x)
@@ -36,8 +36,9 @@ class EEGNet(nn.Module):
         x = self.activation(x)
         x = self.avg_pool2(x)
         x = self.dropout2(x)
-
         x = self.flatten(x)
+        if return_last_layer:
+            return x  # 마지막 레이어 전까지의 출력 반환
         x = self.fc(x)
         x = self.softmax(x)
 

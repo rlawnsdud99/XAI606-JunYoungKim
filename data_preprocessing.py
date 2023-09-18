@@ -2,6 +2,8 @@ import mne
 import numpy as np
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 
 def load_eeg_data(filename):
@@ -116,3 +118,32 @@ def split_data(data, labels):
     print(f"Test label shape: {y_test.shape}")
 
     return x_train, x_val, x_test, y_train, y_val, y_test
+
+
+def apply_tsne(x_data, y_labels, title="t-SNE plot", perplexity=50):
+    tsne = TSNE(n_components=2, perplexity=perplexity, random_state=42)
+    x_tsne = tsne.fit_transform(x_data.reshape(x_data.shape[0], -1))
+
+    plt.figure(figsize=(10, 8))
+    scatter = plt.scatter(x_tsne[:, 0], x_tsne[:, 1], c=y_labels, cmap="viridis")
+
+    plt.title(title)
+    plt.xlabel("t-SNE Dimension 1")
+    plt.ylabel("t-SNE Dimension 2")
+
+    # 라벨 추가
+    legend_labels = [
+        plt.Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="w",
+            label=str(i),
+            markersize=10,
+            markerfacecolor=plt.cm.viridis(i / np.max(y_labels)),
+        )
+        for i in np.unique(y_labels)
+    ]
+    plt.legend(handles=legend_labels, title="Labels")
+
+    plt.show()

@@ -1,4 +1,4 @@
-from data_preprocessing import load_eeg_data, preprocess_data, split_data
+from data_preprocessing import load_eeg_data, preprocess_data, split_data, apply_tsne
 from model_definition import EEGNet
 from train_eval import train_model
 from test import test_model
@@ -23,7 +23,7 @@ def main():
     num_channels = X_train.shape[1]  # 데이터에 따라 변경
     model = EEGNet(num_classes=len(np.unique(y_train)), num_channels=num_channels)
 
-    train_model(model, X_train, y_train, X_val, y_val, 20)
+    train_model(model, X_train, y_train, X_val, y_val, 100)
 
     # test
     test_model(model, X_test, y_test)
