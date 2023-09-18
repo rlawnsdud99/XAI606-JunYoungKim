@@ -36,6 +36,6 @@ S12: '!'
 ---
 
 #### Dataset Download
-You can download the `.npy` files for the dataset from [this Google Drive link](https://drive.google.com/file/d/1jxxWrUSZFvqJ7iyXW_cb4_W1kkTA7tXp/view?usp=drive_link).
+You can download the preprocessed `.npy` files for the dataset from [this Google Drive link](https://drive.google.com/file/d/1jxxWrUSZFvqJ7iyXW_cb4_W1kkTA7tXp/view?usp=drive_link).
 
 
