@@ -10,24 +10,41 @@
 #### II. Project Introduction
 
 ##### Objective
-The primary objective of this project is to optimize the classification accuracy of EEG signals during handwriting tasks. We aim to use advanced neural network architectures and machine learning techniques to correlate EEG signals with handwriting motions, thereby achieving higher classification performance.
+The primary objective is to improve classification performance of EEG signals during handwriting tasks. This will be achieved through the utilization of advanced neural network architectures and machine learning techniques.
 
 ##### Motivation
-Understanding the neural correlates of handwriting can have various applications, including but not limited to, medical diagnosis and human-computer interaction via Brain-Computer Interface (BCI). Improving the classification accuracy can significantly enhance the effectiveness of these applications.
+The project aims to advance the field of Brain-Computer Interface (BCI) by enhancing the classification accuracy of EEG signals associated with handwriting. The improved accuracy could facilitate various applications such as medical diagnostics and enhanced human-computer interactions.
 
 ---
 
 #### III. Dataset Description
 
-The dataset comprises EEG and handwriting data from 5 participants performing handwriting tasks. The data has been approved for ethical standards and involves several features, including EEG signals and handwriting trajectories.
+The dataset is based on EEG and handwriting data from a single participant (P1) who performed handwriting tasks multiple times. This is considered a dependent dataset.
+
+##### Instrumentation
+- **Handwriting Data**: Collected via a self-developed Android app on a HUAWEI MatePad Pro
+  - Sampling rate: 60 Hz
+  - Features: x, y coordinates, timestamp, force, state codes (pen-down, pen-move, pen-up)
+- **EEG Data**: Collected via a 32-channel BrainAmp amplifier
+  - Sampling rate: 1000 Hz
+  - Electrode placement: According to the 10–20 international system
+
+##### Synchronization
+- Key events in the handwriting stream are used as time markers in the EEG stream for synchronization.
+  - S1 to S12: Represent the first pen-down events for each letter and punctuation in the sentence 'HELLO, WORLD!'
+  - S20: Marks the end of the trial
+
+##### Experimental Setup
+- **Environment**: Conducted in a sound-attenuated room
+- **Tablet Placement**: Landscape orientation, 35 cm sight distance, 40-degree angle above horizontal
+- **Task**: Writing the sentence 'HELLO, WORLD!' 300 times in 12 identical blocks on the tablet
+- **Additional**: Breaks are allowed, and P1 has conducted an extra session for testing cross-session accuracy.
 
 ##### Splitting the Dataset
-- **Training Dataset**: 70% of the data from each participant will be used for training. It will contain both input EEG data and the corresponding ground truth of handwriting states.
-  
-- **Validation Dataset**: 15% of the data from each participant will be used for model validation. This subset will also include both input and ground truth.
-
-- **Test Dataset**: The remaining 15% will be used for model testing. This set will only contain the input EEG data without any ground truth to evaluate the model's performance.
+- **Training Dataset**: 70% of P1's data
+- **Validation Dataset**: 15% of P1's data
+- **Test Dataset**: Remaining 15% of P1's data
+  - Note: Only input EEG data will be provided in the test dataset for model evaluation
 
 ##### Release Plan
-The training and validation datasets will be publicly released for project participants to train and validate their models. The test dataset will be used to evaluate the models, and only input data will be provided.
-
+The training and validation datasets will be available for participants to train and verify their models. The test dataset will be solely for model evaluation.
