@@ -3,39 +3,44 @@
 ---
 
 #### I. Project Title
-**Optimizing Classification Performance in Handwriting EEG Data**
+**Optimizing Classification Performance in EMG-Based Gesture Recognition**
 
 ---
 
 #### II. Project Introduction
 
 ##### Objective
-The primary objective is to improve classification performance of EEG signals during handwriting tasks. This will be achieved through the utilization of advanced neural network architectures and machine learning techniques.
+The primary goal is to enhance the classification accuracy of EMG signals during static hand gestures. We'll employ advanced neural network architectures and machine learning techniques for this.
 
 ##### Motivation
-The project aims to advance the field of Brain-Computer Interface (BCI) by enhancing the classification accuracy of EEG signals associated with handwriting. The improved accuracy could facilitate various applications such as medical diagnostics and enhanced human-computer interactions.
+Improving the accuracy of EMG-based gesture recognition has significant implications for BCI applications, including assistive technologies and human-computer interaction.
 
 ---
 
 #### III. Dataset Description
 
-The dataset is based on EEG and handwriting data from a single participant (P1). Labels correspond to the first pen-down events for each letter and punctuation in the sentence 'HELLO, WORLD!' The test dataset for model evaluation will only include input EEG data.
-S1: 'H'
-S2: 'E'
-S3: 'L' (first 'L')
-S4: 'L' (second 'L')
-S5: 'O' (first 'O')
-S6: ','
-S7: 'W'
-S8: 'O' (second 'O')
-S9: 'R'
-S10: 'L' (third 'L')
-S11: 'D'
-S12: '!'
+The dataset contains raw EMG data from 36 subjects performing static hand gestures. Each subject executed two series of 6 or 7 basic gestures. Each gesture lasted for 3 seconds, with a 3-second pause between gestures. Data was collected using a MYO Thalmic bracelet equipped with eight sensors.
 
+- **Columns:**
+  1) Time - Time in ms
+  2-9) Channel - Eight EMG channels from MYO Thalmic bracelet
+  10) Class - Gesture labels:
+    - 0: Unmarked data
+    - 1: Hand at rest
+    - 2: Hand clenched in a fist
+    - 3: Wrist flexion
+    - 4: Wrist extension
+    - 5: Radial deviations
+    - 6: Ulnar deviations
+    - 7: Extended palm (not performed by all subjects)
+    
+- **Additional Column:**
+  - Label: Refers to the subject who performed the experiment
+  
 ---
 
 #### Dataset Download
-You can download the preprocessed `.npy` files for the dataset from [this Google Drive link](https://drive.google.com/file/d/1jxxWrUSZFvqJ7iyXW_cb4_W1kkTA7tXp/view?usp=drive_link).
+You can download the `.csv` files for the dataset from [this Google Drive link](https://drive.google.com/file/d/1gteiKLbEWt5HG1697fILZXNC7X8YWWQq/view?usp=sharing).
 
+---
 
