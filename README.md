@@ -10,7 +10,7 @@
 #### II. Project Introduction
 
 ##### Objective
-The primary goal is to enhance the classification accuracy of EMG signals during static hand gestures. We'll employ advanced neural network architectures and machine learning techniques for this.
+The primary goal is to enhance the classification accuracy of EMG signals for static hand gestures, specifically focusing on Class 1 to Class 6. We'll employ advanced neural network architectures and machine learning techniques for this. Class 0 can be used as a baseline or as deemed appropriate.
 
 ##### Motivation
 Improving the accuracy of EMG-based gesture recognition has significant implications for BCI applications, including assistive technologies and human-computer interaction.
