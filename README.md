@@ -18,8 +18,7 @@ Improving the accuracy of EMG-based gesture recognition has significant implicat
 ---
 
 #### III. Dataset Description
-
-The dataset contains raw EMG data from 36 subjects performing static hand gestures. Each subject executed two series of 6 or 7 basic gestures. Each gesture lasted for 3 seconds, with a 3-second pause between gestures. Data was collected using a MYO Thalmic bracelet equipped with eight sensors.
+The dataset contains raw EMG data from 36 subjects performing static hand gestures(Open data). Each subject executed two series of 6 or 7 basic gestures. Each gesture lasted for 3 seconds, with a 3-second pause between gestures. Data was collected using a MYO Thalmic bracelet equipped with eight sensors.
 
 - **Columns:**
   1) Time - Time in ms
