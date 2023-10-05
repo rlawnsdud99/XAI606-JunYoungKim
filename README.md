@@ -3,7 +3,7 @@
 ---
 
 #### I. Project Title
-**Optimizing Classification Performance in EMG-Based Gesture Recognition**
+**Optimizing Subject Independent Classification Performance in EMG-Based Gesture Recognition**
 
 ---
 
