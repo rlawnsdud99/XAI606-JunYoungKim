@@ -42,7 +42,7 @@ The dataset contains raw EMG data from 36 subjects performing static hand gestur
 You can download the `.csv` files for the dataset from [this Google Drive link](https://drive.google.com/file/d/1gteiKLbEWt5HG1697fILZXNC7X8YWWQq/view?usp=sharing).
 
 #### Requirement
-use jyk.yaml and make conda env it will work.
+use `jyk.yaml` and make conda env it will work.
 
 ---
 
