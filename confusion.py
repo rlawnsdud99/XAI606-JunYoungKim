@@ -21,11 +21,21 @@ train_df = train_df[(train_df["class"] != 0) & (train_df["class"] != 7)].copy()
 test_df = test_df[(test_df["class"] != 0) & (test_df["class"] != 7)].copy()
 train_df["class"] -= 1
 test_df["class"] -= 1
+
 # 데이터와 라벨 분리
 train_data = train_df.drop(columns=["label", "class", "time"]).values
 train_label = train_df["class"].values
 test_data = test_df.drop(columns=["label", "class", "time"]).values
 test_label = test_df["class"].values
+
+# # 시간이 오래 걸린다면 데이터 슬라이싱
+# sample_size = 1000  # 원하는 샘플 개수
+
+# train_data = train_data[:sample_size]
+# train_label = train_label[:sample_size]
+
+# test_data = test_data[:sample_size]
+# test_label = test_label[:sample_size]
 
 # 정규화
 mean = train_data.mean(axis=0)
