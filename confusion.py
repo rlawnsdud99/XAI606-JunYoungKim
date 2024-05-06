@@ -8,6 +8,7 @@ from model_definition import CustomNet  # 모델 정의가 이 파일에 있다�
 import os
 from joblib import load
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 
 # 파일 경로 설정
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,17 +17,23 @@ test_csv_path = os.path.join(current_dir, "data", "test_labeled.csv")
 train_df = pd.read_csv(train_csv_path)
 test_df = pd.read_csv(test_csv_path)
 
-# 특정 클래스 제거 및 라벨 수정
-train_df = train_df[(train_df["class"] != 0) & (train_df["class"] != 7)].copy()
-test_df = test_df[(test_df["class"] != 0) & (test_df["class"] != 7)].copy()
-train_df["class"] -= 1
-test_df["class"] -= 1
+# class가 0 인 행을 제거
+train_dataframe = train_df[train_df["class"] != 0].copy()
+test_dataframe = test_df[test_df["class"] != 0].copy()
+
+# 데이터 셔플링
+train_dataframe = train_dataframe.sample(frac=1).reset_index(drop=True)
+test_dataframe = test_dataframe.sample(frac=1).reset_index(drop=True)
+
+# class를 0부터 시작하도록 변경
+train_dataframe["class"] -= 1
+test_dataframe["class"] -= 1
 
 # 데이터와 라벨 분리
-train_data = train_df.drop(columns=["label", "class", "time"]).values
-train_label = train_df["class"].values
-test_data = test_df.drop(columns=["label", "class", "time"]).values
-test_label = test_df["class"].values
+train_data = train_dataframe.drop(columns=["label", "class", "time"]).values
+train_label = train_dataframe["class"].values
+test_data = test_dataframe.drop(columns=["label", "class", "time"]).values
+test_label = test_dataframe["class"].values
 
 # # 시간이 오래 걸린다면 데이터 슬라이싱
 # sample_size = 1000  # 원하는 샘플 개수
@@ -41,7 +48,9 @@ test_label = test_df["class"].values
 mean = train_data.mean(axis=0)
 std = train_data.std(axis=0)
 train_data = (train_data - mean) / std
-test_data = (test_data - mean) / std  # 테스트 데이터도 학습 데이터의 평균과 표준편차로 정규화
+test_data = (
+    test_data - mean
+) / std  # 테스트 데이터도 학습 데이터의 평균과 표준편차로 정규화
 
 # DataLoader 설정
 batch_size = 512
@@ -68,6 +77,7 @@ with torch.no_grad():
         predictions.extend(predicted.cpu().numpy())
 cm = confusion_matrix(test_label, predictions)
 
+
 # KNN 모델로 예측
 knn_model = load("knn_model.joblib")
 knn_predictions = knn_model.predict(test_data)
@@ -75,22 +85,32 @@ cm_knn = confusion_matrix(test_label, knn_predictions)
 
 # Neural Network 모델의 정확도
 nn_accuracy = accuracy_score(test_label, predictions)
+# Calculate F1 Scores for each class for Neural Network
+f1_scores_nn = f1_score(test_label, predictions, average=None)
+f1_macro_nn = f1_scores_nn.mean()
+print("Neural Network F1 Scores by Class:", f1_scores_nn)
+print(f"Neural Network Macro F1 Score: {f1_macro_nn:.3f}")
 
 # KNN 모델의 정확도
 knn_accuracy = accuracy_score(test_label, knn_predictions)
+# Calculate F1 Scores for each class for KNN
+f1_scores_knn = f1_score(test_label, knn_predictions, average=None)
+f1_macro_knn = f1_scores_knn.mean()
+print("KNN F1 Scores by Class:", f1_scores_knn)
+print(f"KNN Macro F1 Score: {f1_macro_knn:.3f}")
 
 # Subplot 설정
 fig, axes = plt.subplots(1, 2, figsize=(20, 7))
 
 # 첫 번째 subplot: Neural Network Confusion Matrix
 sns.heatmap(cm, annot=True, fmt="d", ax=axes[0])
-axes[0].set_title(f"Custom Neural Network (Accuracy: {nn_accuracy:.2f})")
+axes[0].set_title(f"Custom Neural Network (f1-macro: {f1_macro_nn:.2f})")
 axes[0].set_xlabel("Predicted")
 axes[0].set_ylabel("True")
 
 # 두 번째 subplot: KNN Confusion Matrix
 sns.heatmap(cm_knn, annot=True, fmt="d", ax=axes[1])
-axes[1].set_title(f"KNN (Accuracy: {knn_accuracy:.2f})")
+axes[1].set_title(f"KNN (f1-macro: {f1_macro_knn:.2f})")
 axes[1].set_xlabel("Predicted")
 axes[1].set_ylabel("True")
 

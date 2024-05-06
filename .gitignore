@@ -1,0 +1,11 @@
+*.mat
+*.set
+*.fdt
+*.npy
+*.mp4
+*.png
+*.pth
+*.joblib
+*.csv
+/result
+/runs

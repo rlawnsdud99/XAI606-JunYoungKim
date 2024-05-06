@@ -21,8 +21,8 @@ train_df = pd.read_csv(train_csv_path)
 val_df = pd.read_csv(val_csv_path)
 
 # class가 0,7 인 행을 제거
-train_dataframe = train_df[(train_df["class"] != 0) & (train_df["class"] != 7)].copy()
-val_dataframe = val_df[(val_df["class"] != 0) & (val_df["class"] != 7)].copy()
+train_dataframe = train_df[train_df["class"] != 0].copy()
+val_dataframe = val_df[val_df["class"] != 0].copy()
 
 # 데이터 셔플링
 train_dataframe = train_dataframe.sample(frac=1).reset_index(drop=True)
@@ -52,8 +52,6 @@ print(f"type: {type(train_data)}, shape: {train_data.shape}")
 print(f"type: {type(train_label)}, shape: {train_label.shape}")
 print(f"type: {type(val_data)}, shape: {val_data.shape}")
 print(f"type: {type(val_label)}, shape: {val_label.shape}")
-
-## sklearn QuantileTranformer 클래스로 정규화 진행
 
 mean = train_data.mean(axis=0)
 std = train_data.std(axis=0)

@@ -8,8 +8,8 @@ import seaborn as sns
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
-from model_definition import CustomNet
+from torch.utils.data import TensorDataset, DataLoader, WeightedRandomSampler
+from model_definition import CustomNet, CNN1DNet
 
 from torchsummary import summary
 from torch.utils.tensorboard import SummaryWriter
@@ -17,6 +17,8 @@ from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
+import numpy as np
 
 ## 파일 읽고 데이터 라벨 쌍으로 전처리
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -27,13 +29,20 @@ val_csv_path = os.path.join(current_dir, "data", "val.csv")
 train_df = pd.read_csv(train_csv_path)
 val_df = pd.read_csv(val_csv_path)
 
-# class가 0,7 인 행을 제거
-train_dataframe = train_df[(train_df["class"] != 0) & (train_df["class"] != 7)].copy()
-val_dataframe = val_df[(val_df["class"] != 0) & (val_df["class"] != 7)].copy()
+# class가 0 인 행을 제거
+train_dataframe = train_df[train_df["class"] != 0].copy()
+val_dataframe = val_df[val_df["class"] != 0].copy()
 
-# 라벨을 1씩 감소(CEE 사용경우 라벨 0부터 시작해야함)
-train_dataframe["class"] = train_dataframe["class"] - 1
-val_dataframe["class"] = val_dataframe["class"] - 1
+# 데이터 셔플링
+train_dataframe = train_dataframe.sample(frac=1).reset_index(drop=True)
+val_dataframe = val_dataframe.sample(frac=1).reset_index(drop=True)
+
+# class를 0부터 시작하도록 변경
+train_dataframe["class"] -= 1
+val_dataframe["class"] -= 1
+
+# train_dataframe = train_df.copy()
+# val_dataframe = val_df.copy()
 
 # Train set에서 클래스 분포 확인
 train_class_distribution = train_dataframe["class"].value_counts().sort_index()
@@ -56,8 +65,6 @@ print(f"type: {type(train_label)}, shape: {train_label.shape}")
 print(f"type: {type(val_data)}, shape: {val_data.shape}")
 print(f"type: {type(val_label)}, shape: {val_label.shape}")
 
-## sklearn QuantileTranformer 클래스로 정규화 진행
-
 mean = train_data.mean(axis=0)
 std = train_data.std(axis=0)
 
@@ -66,15 +73,12 @@ train_data /= std
 
 val_data -= mean
 val_data /= std
-# scalar = QuantileTransformer()
-# train_data = scalar.fit_transform(train_data)
-# val_data = scalar.transform(val_data)
 
 # Hyperparameters
 input_size = train_data.shape[1]
 num_classes = len(set(train_label))
 hidden_size = 32
-batch_size = 512
+batch_size = 2048
 learning_rate = 0.001
 num_epochs = 50
 
@@ -91,6 +95,21 @@ val_label_tensor = torch.LongTensor(val_label)
 
 # Create DataLoader for training and validation datasets
 train_dataset = TensorDataset(train_data_tensor, train_label_tensor)
+
+# # Calculate class weights
+# class_counts = np.bincount(train_label)
+# total_samples = len(train_label)
+# weights = 1.0 / class_counts
+# adjusted_weights = np.power(
+#     weights, 1
+# )  # Increase the power to enhance minority class sampling
+
+# sample_weights = adjusted_weights[train_label]
+# # Create a WeightedRandomSampler
+# sampler = WeightedRandomSampler(
+#     weights=sample_weights, num_samples=len(sample_weights), replacement=True
+# )
+
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 for data, labels in train_loader:
     print(f"Data shape: {data.shape}, Labels shape: {labels.shape}")
@@ -120,6 +139,13 @@ scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs, et
 print("Model Summary:")
 summary(model, input_size=(8, 1), batch_size=batch_size)
 
+
+# Function to log class distribution in a batch
+def log_class_distribution(labels, batch_idx):
+    class_distribution = np.bincount(labels.numpy(), minlength=len(class_counts))
+    print(f"Batch {batch_idx} class distribution: {class_distribution}")
+
+
 # ... (이전 코드는 생략)
 for epoch in range(num_epochs):
     model.train()
@@ -127,14 +153,19 @@ for epoch in range(num_epochs):
     num_batches = 0
     correct_train = 0  # Training Accuracy Calculation
     total_train = 0  # Training Accuracy Calculation
-
+    train_preds = []
+    train_true = []
     for i, (data, labels) in enumerate(train_loader):
+        # log_class_distribution(labels, i)
         data = data.to(device)
         labels = labels.to(device)
         outputs = model(data)
+
         loss = criterion(outputs, labels)
         # Training Accuracy Calculation
         _, predicted_train = torch.max(outputs.data, 1)
+        train_preds.extend(predicted_train.cpu().numpy())
+        train_true.extend(labels.cpu().numpy())
         total_train += labels.size(0)
         correct_train += (predicted_train == labels).sum().item()
 
@@ -158,8 +189,16 @@ for epoch in range(num_epochs):
     print(
         f"Epoch [{epoch+1}/{num_epochs}], Average Training Loss: {avg_train_loss:.4f}, Training Accuracy: {train_accuracy}%"
     )
+    # Compute F1 Score for training
+    train_f1_scores = f1_score(train_true, train_preds, average=None)
+    train_f1_macro = np.mean(train_f1_scores)
+    print(f"Train F1 Scores by Class: {train_f1_scores}")
+    print(f"Train Macro F1 Score: {train_f1_macro:.3f}")
+
     # Validation after each epoch
     model.eval()
+    val_preds = []
+    val_true = []
     with torch.no_grad():
         correct = 0
         total = 0
@@ -172,6 +211,8 @@ for epoch in range(num_epochs):
             loss = criterion(outputs, labels)
             val_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
+            val_preds.extend(predicted.cpu().numpy())
+            val_true.extend(labels.cpu().numpy())
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
@@ -184,6 +225,12 @@ for epoch in range(num_epochs):
 
         print(f"Validation Loss: {val_loss:.4f}, Validation Accuracy: {accuracy}%")
         torch.save(model.state_dict(), "trained_model.pth")
+
+        # Compute F1 Score for validation
+        val_f1_scores = f1_score(val_true, val_preds, average=None)
+        val_f1_macro = np.mean(val_f1_scores)
+        print(f"Validation F1 Scores by Class: {val_f1_scores}")
+        print(f"Validation Macro F1 Score: {val_f1_macro:.3f}")
 
         # Early stopping 체크
         if val_loss < best_val_loss:

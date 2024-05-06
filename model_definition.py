@@ -61,34 +61,6 @@ class EEGNet(nn.Module):
         return x
 
 
-class CNN1DNet(nn.Module):
-    def __init__(self, hidden_size, num_classes):
-        super(CNN1DNet, self).__init__()
-
-        self.layer1 = nn.Sequential(
-            nn.Conv1d(8, hidden_size, kernel_size=2),
-            nn.BatchNorm1d(hidden_size),
-            nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2),
-        )
-
-        self.layer2 = nn.Sequential(
-            nn.Conv1d(hidden_size, hidden_size * 2, kernel_size=2),
-            nn.BatchNorm1d(hidden_size * 2),
-            nn.ReLU(),
-            nn.MaxPool1d(2),
-        )
-
-        self.fc1 = nn.Linear(hidden_size * 2, num_classes)
-
-    def forward(self, x):
-        out = self.layer1(x)
-        out = self.layer2(out)
-        out = out.view(out.size(0), -1)
-        out = self.fc1(out)
-        return out
-
-
 class FCNet(nn.Module):
     def __init__(self, hidden_size, num_classes):
         super(FCNet, self).__init__()
@@ -142,6 +114,7 @@ class CustomNet(nn.Module):
         self.fc10 = nn.Linear(64, num_classes)
 
     def forward(self, x):
+
         x = x.view(x.size(0), -1)
         x1 = F.relu(self.fc1(x))
         x1 = self.dropout(x1)  # Dropout after first layer
@@ -168,3 +141,27 @@ class CustomNet(nn.Module):
 
         out = self.fc10(combined)
         return out
+
+
+class CNN1DNet(nn.Module):
+    def __init__(self, num_classes):
+        super(CNN1DNet, self).__init__()
+        # Assuming input shape [batch, 8, 1] for 8 channels of EMG data
+        self.conv1 = nn.Conv1d(8, 16, kernel_size=1, stride=1)
+        self.relu = nn.ReLU()
+        self.pool = nn.MaxPool1d(
+            kernel_size=1
+        )  # Might adjust depending on further model design considerations
+        self.conv2 = nn.Conv1d(16, 32, kernel_size=1, stride=1)
+        self.fc1 = nn.Linear(32, num_classes)
+
+    def forward(self, x):
+
+        x = x.view(x.size(1), -1)
+        x = self.pool(self.relu(self.conv1(x)))
+        x = self.relu(self.conv2(x))
+        # Flatten the output from the convolutional layers to feed into the fully connected layer
+        x = torch.flatten(x, 1)
+        x = x.view(x.size(1), -1)
+        x = self.fc1(x)
+        return x
